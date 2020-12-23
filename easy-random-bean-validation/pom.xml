@@ -52,7 +52,6 @@
         <dependency>
             <groupId>org.jeasy</groupId>
             <artifactId>easy-random-randomizers</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.validation</groupId>

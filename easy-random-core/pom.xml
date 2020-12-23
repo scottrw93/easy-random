@@ -12,23 +12,6 @@
     <description>Easy Random core implementation</description>
     <url>https://github.com/j-easy/easy-random</url>
 
-    <scm>
-        <url>git@github.com:j-easy/easy-random.git</url>
-        <connection>scm:git:git@github.com:j-easy/easy-random.git</connection>
-        <developerConnection>scm:git:git@github.com:j-easy/easy-random.git</developerConnection>
-        <tag>HEAD</tag>
-    </scm>
-
-    <ciManagement>
-        <system>Github Actions</system>
-        <url>https://github.com/j-easy/easy-random/actions</url>
-    </ciManagement>
-
-    <issueManagement>
-        <system>GitHub</system>
-        <url>https://github.com/j-easy/easy-random/issues</url>
-    </issueManagement>
-
     <licenses>
         <license>
             <name>MIT License</name>

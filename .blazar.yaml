@@ -10,5 +10,5 @@ buildpack:
   branch: v2
 
 provides:
-  name: easy-random
-  version: 5.0.0-$GIT_BRANCH-SNAPSHOT
+  - name: easy-random
+    version: 5.0.0-$GIT_BRANCH-SNAPSHOT

@@ -10,5 +10,5 @@ buildpack:
   branch: v2
 
 provides:
-  name: kubernetes-client
+  name: easy-random
   version: 5.0.0-$GIT_BRANCH-SNAPSHOT

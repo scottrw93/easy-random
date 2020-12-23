@@ -2,6 +2,12 @@ enabled: true
 
 env:
   SET_VERSION_OVERRIDE: 5.0.0-$GIT_BRANCH-SNAPSHOT
+  MAVEN_OPTS: -Xmx1024m
+  MAVEN_TEST_HEAP: 1024m
+
+buildResources:
+  cpus: 2
+  memoryMb: 2560
 
 buildpack:
   host: git.hubteam.com

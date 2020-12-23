@@ -33,8 +33,8 @@ public class FloatRangeRandomizer extends AbstractRangeRandomizer<Float> {
     /**
      * Create a new {@link FloatRangeRandomizer}.
      *
-     * @param min min value
-     * @param max max value
+     * @param min min value (inclusive)
+     * @param max max value (exclusive)
      */
     public FloatRangeRandomizer(final Float min, final Float max) {
         super(min, max);
@@ -43,8 +43,8 @@ public class FloatRangeRandomizer extends AbstractRangeRandomizer<Float> {
     /**
      * Create a new {@link FloatRangeRandomizer}.
      *
-     * @param min  min value
-     * @param max  max value
+     * @param min  min value (inclusive)
+     * @param max  max value (exclusive)
      * @param seed initial seed
      */
     public FloatRangeRandomizer(final Float min, final Float max, final long seed) {
@@ -66,29 +66,6 @@ public class FloatRangeRandomizer extends AbstractRangeRandomizer<Float> {
     @Override
     protected Float getDefaultMaxValue() {
         return Float.MAX_VALUE;
-    }
-
-    /**
-     * Create a new {@link FloatRangeRandomizer}.
-     *
-     * @param min min value
-     * @param max max value
-     * @return a new {@link FloatRangeRandomizer}.
-     */
-    public static FloatRangeRandomizer aNewFloatRangeRandomizer(final Float min, final Float max) {
-        return new FloatRangeRandomizer(min, max);
-    }
-
-    /**
-     * Create a new {@link FloatRangeRandomizer}.
-     *
-     * @param min  min value
-     * @param max  max value
-     * @param seed initial seed
-     * @return a new {@link FloatRangeRandomizer}.
-     */
-    public static FloatRangeRandomizer aNewFloatRangeRandomizer(final Float min, final Float max, final long seed) {
-        return new FloatRangeRandomizer(min, max, seed);
     }
 
     @Override

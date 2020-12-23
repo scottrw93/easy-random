@@ -30,8 +30,8 @@ public class InstantRangeRandomizer extends AbstractRangeRandomizer<Instant> {
 	/**
 	 * Create a new {@link InstantRangeRandomizer}.
 	 *
-	 * @param min min value
-	 * @param max max value
+	 * @param min min value (inclusive)
+	 * @param max max value (exclusive)
 	 */
     public InstantRangeRandomizer(final Instant min, final Instant max) {
         super(min, max);
@@ -40,36 +40,13 @@ public class InstantRangeRandomizer extends AbstractRangeRandomizer<Instant> {
 	/**
 	 * Create a new {@link InstantRangeRandomizer}.
 	 *
-	 * @param min min value
-	 * @param max max value
+	 * @param min min value (inclusive)
+	 * @param max max value (exclusive)
 	 * @param seed initial seed
 	 */
     public InstantRangeRandomizer(final Instant min, final Instant max, long seed) {
         super(min, max, seed);
     }
-
-	/**
-	 * Create a new {@link InstantRangeRandomizer}.
-	 *
-	 * @param min min value
-	 * @param max max value
-	 * @return a new {@link InstantRangeRandomizer}.
-	 */
-    public static InstantRangeRandomizer aNewInstantRangeRandomizer(final Instant min, final Instant max) {
-    	return new InstantRangeRandomizer(min, max);
-	}
-
-	/**
-	 * Create a new {@link InstantRangeRandomizer}.
-	 *
-	 * @param min  min value
-	 * @param max  max value
-	 * @param seed initial seed
-	 * @return a new {@link InstantRangeRandomizer}.
-	 */
-	public static InstantRangeRandomizer aNewInstantRangeRandomizer(final Instant min, final Instant max, final long seed) {
-		return new InstantRangeRandomizer(min, max, seed);
-	}
 
     @Override
     protected void checkValues() {

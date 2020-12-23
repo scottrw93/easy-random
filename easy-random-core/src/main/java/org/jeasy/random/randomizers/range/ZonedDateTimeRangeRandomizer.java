@@ -36,8 +36,8 @@ public class ZonedDateTimeRangeRandomizer extends AbstractRangeRandomizer<ZonedD
     /**
      * Create a new {@link ZonedDateTimeRangeRandomizer}.
      *
-     * @param min min value
-     * @param max max value
+     * @param min min value (inclusive)
+     * @param max max value (exclusive)
      */
     public ZonedDateTimeRangeRandomizer(final ZonedDateTime min, final ZonedDateTime max) {
         super(min, max);
@@ -46,35 +46,12 @@ public class ZonedDateTimeRangeRandomizer extends AbstractRangeRandomizer<ZonedD
     /**
      * Create a new {@link ZonedDateTimeRangeRandomizer}.
      *
-     * @param min  min value
-     * @param max  max value
+     * @param min  min value (inclusive)
+     * @param max  max value (exclusive)
      * @param seed initial seed
      */
     public ZonedDateTimeRangeRandomizer(final ZonedDateTime min, final ZonedDateTime max, final long seed) {
         super(min, max, seed);
-    }
-
-    /**
-     * Create a new {@link ZonedDateTimeRangeRandomizer}.
-     *
-     * @param min min value
-     * @param max max value
-     * @return a new {@link ZonedDateTimeRangeRandomizer}.
-     */
-    public static ZonedDateTimeRangeRandomizer aNewZonedDateTimeRangeRandomizer(final ZonedDateTime min, final ZonedDateTime max) {
-        return new ZonedDateTimeRangeRandomizer(min, max);
-    }
-
-    /**
-     * Create a new {@link ZonedDateTimeRangeRandomizer}.
-     *
-     * @param min  min value
-     * @param max  max value
-     * @param seed initial seed
-     * @return a new {@link ZonedDateTimeRangeRandomizer}.
-     */
-    public static ZonedDateTimeRangeRandomizer aNewZonedDateTimeRangeRandomizer(final ZonedDateTime min, final ZonedDateTime max, final long seed) {
-        return new ZonedDateTimeRangeRandomizer(min, max, seed);
     }
 
     @Override

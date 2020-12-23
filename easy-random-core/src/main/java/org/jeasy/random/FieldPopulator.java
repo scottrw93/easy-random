@@ -23,6 +23,10 @@
  */
 package org.jeasy.random;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.TypeVariable;
+import java.util.List;
+
 import org.jeasy.random.api.ContextAwareRandomizer;
 import org.jeasy.random.api.Randomizer;
 import org.jeasy.random.api.RandomizerProvider;
@@ -32,11 +36,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Type;
 
-import static org.jeasy.random.util.CollectionUtils.randomElementOf;
 import static org.jeasy.random.util.ReflectionUtils.*;
 
 /**
- * Component that encapsulate the logic of generating a random value for a given field.
+ * Component that encapsulates the logic of generating a random value for a given field.
  * It collaborates with a:
  * <ul>
  *     <li>{@link EasyRandom} whenever the field is a user defined type.</li>
@@ -57,15 +60,19 @@ class FieldPopulator {
 
     private final MapPopulator mapPopulator;
 
+    private final OptionalPopulator optionalPopulator;
+
     private final RandomizerProvider randomizerProvider;
 
     FieldPopulator(final EasyRandom easyRandom, final RandomizerProvider randomizerProvider,
-                   final ArrayPopulator arrayPopulator, final CollectionPopulator collectionPopulator, final MapPopulator mapPopulator) {
+                   final ArrayPopulator arrayPopulator, final CollectionPopulator collectionPopulator,
+                   final MapPopulator mapPopulator, OptionalPopulator optionalPopulator) {
         this.easyRandom = easyRandom;
         this.randomizerProvider = randomizerProvider;
         this.arrayPopulator = arrayPopulator;
         this.collectionPopulator = collectionPopulator;
         this.mapPopulator = mapPopulator;
+        this.optionalPopulator = optionalPopulator;
     }
 
     void populateField(final Object target, final Field field, final RandomizationContext context) throws IllegalAccessException {
@@ -73,10 +80,10 @@ class FieldPopulator {
         if (randomizer instanceof SkipRandomizer) {
             return;
         }
+        context.pushStackItem(new RandomizationContextStackItem(target, field));
         if (randomizer instanceof ContextAwareRandomizer) {
             ((ContextAwareRandomizer<?>) randomizer).setRandomizerContext(context);
         }
-        context.pushStackItem(new RandomizationContextStackItem(target, field));
         if(!context.hasExceededRandomizationDepth()) {
             Object value;
             if (randomizer != null) {
@@ -110,7 +117,14 @@ class FieldPopulator {
         // issue 241: if there is no custom randomizer by field, then check by type
         Randomizer<?> randomizer = randomizerProvider.getRandomizerByField(field, context);
         if (randomizer == null) {
-            randomizer = randomizerProvider.getRandomizerByType(field.getType(), context);
+            Type genericType = field.getGenericType();
+            if (isTypeVariable(genericType)) {
+                // if generic type, retrieve actual type from declaring class
+                Class<?> type = getParametrizedType(field, context);
+                randomizer = randomizerProvider.getRandomizerByType(type, context);
+            } else {
+                randomizer = randomizerProvider.getRandomizerByType(field.getType(), context);
+            }
         }
         return randomizer;
     }
@@ -119,25 +133,74 @@ class FieldPopulator {
         Class<?> fieldType = field.getType();
         Type fieldGenericType = field.getGenericType();
 
-        Object value;
         if (isArrayType(fieldType)) {
-            value = arrayPopulator.getRandomArray(fieldType, context);
+            return arrayPopulator.getRandomArray(fieldType, context);
         } else if (isCollectionType(fieldType)) {
-            value = collectionPopulator.getRandomCollection(field, context);
+            return collectionPopulator.getRandomCollection(field, context);
         } else if (isMapType(fieldType)) {
-            value = mapPopulator.getRandomMap(field, context);
+            return mapPopulator.getRandomMap(field, context);
+        } else if (isOptionalType(fieldType)) {
+            return optionalPopulator.getRandomOptional(field, context);
         } else {
-            if (context.getParameters().isScanClasspathForConcreteTypes() && isAbstract(fieldType) && !isEnumType(fieldType) /*enums can be abstract, but can not inherit*/) {
-                Class<?> randomConcreteSubType = randomElementOf(filterSameParameterizedTypes(getPublicConcreteSubTypesOf(fieldType), fieldGenericType));
-                if (randomConcreteSubType == null) {
+            if (context.getParameters().isScanClasspathForConcreteTypes() && isAbstract(fieldType) && !isEnumType(fieldType) /*enums can be abstract, but cannot inherit*/) {
+                List<Class<?>> parameterizedTypes = filterSameParameterizedTypes(getPublicConcreteSubTypesOf(fieldType), fieldGenericType);
+                if (parameterizedTypes.isEmpty()) {
                     throw new ObjectCreationException("Unable to find a matching concrete subtype of type: " + fieldType);
                 } else {
-                    value = easyRandom.doPopulateBean(randomConcreteSubType, context);
+                    Class<?> randomConcreteSubType = parameterizedTypes.get(easyRandom.nextInt(parameterizedTypes.size()));
+                    return easyRandom.doPopulateBean(randomConcreteSubType, context);
                 }
             } else {
-                value = easyRandom.doPopulateBean(fieldType, context);
+                Type genericType = field.getGenericType();
+                if (isTypeVariable(genericType)) {
+                    // if generic type, try to retrieve actual type from hierarchy
+                    Class<?> type = getParametrizedType(field, context);
+                    return easyRandom.doPopulateBean(type, context);
+                }
+                return easyRandom.doPopulateBean(fieldType, context);
             }
         }
-        return value;
+    }
+
+    private Class<?> getParametrizedType(Field field, RandomizationContext context) {
+        Class<?> declaringClass = field.getDeclaringClass();
+        TypeVariable<? extends Class<?>>[] typeParameters = declaringClass.getTypeParameters();
+        Type genericSuperclass = getGenericSuperClass(context);
+        ParameterizedType parameterizedGenericSuperType = (ParameterizedType) genericSuperclass;
+        Type[] actualTypeArguments = parameterizedGenericSuperType.getActualTypeArguments();
+        Type actualTypeArgument = null;
+        for (int i = 0; i < typeParameters.length; i++) {
+            if (field.getGenericType().equals(typeParameters[i])) {
+                actualTypeArgument = actualTypeArguments[i];
+            }
+        }
+        if (actualTypeArgument == null) {
+            return field.getClass();
+        }
+        Class<?> aClass;
+        String typeName = null;
+        try {
+            typeName = actualTypeArgument.getTypeName();
+            aClass = Class.forName(typeName);
+        } catch (ClassNotFoundException e) {
+            String message = String.format("Unable to load class %s of generic field %s in class %s. " +
+                            "Please refer to the documentation as this generic type may not be supported for randomization.",
+                    typeName, field.getName(), field.getDeclaringClass().getName());
+            throw new ObjectCreationException(message, e);
+        }
+        return aClass;
+    }
+
+    // find the generic base class in the hierarchy (which might not be the first super type)
+    private Type getGenericSuperClass(RandomizationContext context) {
+        Class<?> targetType = context.getTargetType();
+        Type genericSuperclass = targetType.getGenericSuperclass();
+        while (targetType != null && !(genericSuperclass instanceof ParameterizedType)) {
+            targetType = targetType.getSuperclass();
+            if (targetType != null) {
+                genericSuperclass = targetType.getGenericSuperclass();
+            }
+        }
+        return genericSuperclass;
     }
 }

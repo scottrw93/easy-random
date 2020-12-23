@@ -33,8 +33,8 @@ public class ShortRangeRandomizer extends AbstractRangeRandomizer<Short> {
     /**
      * Create a new {@link ShortRangeRandomizer}.
      *
-     * @param min min value
-     * @param max max value
+     * @param min min value (inclusive)
+     * @param max max value (exclusive)
      */
     public ShortRangeRandomizer(final Short min, final Short max) {
         super(min, max);
@@ -43,35 +43,12 @@ public class ShortRangeRandomizer extends AbstractRangeRandomizer<Short> {
     /**
      * Create a new {@link ShortRangeRandomizer}.
      *
-     * @param min  min value
-     * @param max  max value
+     * @param min  min value (inclusive)
+     * @param max  max value (exclusive)
      * @param seed initial seed
      */
     public ShortRangeRandomizer(final Short min, final Short max, final long seed) {
         super(min, max, seed);
-    }
-
-    /**
-     * Create a new {@link ShortRangeRandomizer}.
-     *
-     * @param min min value
-     * @param max max value
-     * @return a new {@link ShortRangeRandomizer}.
-     */
-    public static ShortRangeRandomizer aNewShortRangeRandomizer(final Short min, final Short max) {
-        return new ShortRangeRandomizer(min, max);
-    }
-
-    /**
-     * Create a new {@link ShortRangeRandomizer}.
-     *
-     * @param min  min value
-     * @param max  max value
-     * @param seed initial seed
-     * @return a new {@link ShortRangeRandomizer}.
-     */
-    public static ShortRangeRandomizer aNewShortRangeRandomizer(final Short min, final Short max, final long seed) {
-        return new ShortRangeRandomizer(min, max, seed);
     }
 
     @Override

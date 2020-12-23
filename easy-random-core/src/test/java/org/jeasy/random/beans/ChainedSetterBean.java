@@ -21,24 +21,29 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *   THE SOFTWARE.
  */
-package org.jeasy.random.util;
+package org.jeasy.random.beans;
 
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.assertThat;
+public class ChainedSetterBean {
 
-import org.junit.jupiter.api.Test;
+    private String name;
+    private int index;
 
-class CollectionUtilsTest {
-
-    @Test
-    void testRandomElementOf() {
-        // Given
-        String[] elements = {"foo", "bar"};
-
-        // When
-        String element = CollectionUtils.randomElementOf(asList(elements));
-
-        // Then
-        assertThat(element).isIn(elements);
+    public ChainedSetterBean setName(String name) {
+        this.name = name;
+        return this;
     }
+
+    public ChainedSetterBean setIndex(int index) {
+        this.index = index;
+        return this;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
 }

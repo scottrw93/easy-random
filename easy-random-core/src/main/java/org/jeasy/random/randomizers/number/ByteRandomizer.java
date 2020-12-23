@@ -50,25 +50,6 @@ public class ByteRandomizer implements Randomizer<Byte> {
         delegate = new IntegerRandomizer(seed);
     }
 
-    /**
-     * Create a new {@link ByteRandomizer}.
-     *
-     * @return a new {@link ByteRandomizer}.
-     */
-    public static ByteRandomizer aNewByteRandomizer() {
-        return new ByteRandomizer();
-    }
-
-    /**
-     * Create a new {@link ByteRandomizer}.
-     *
-     * @param seed initial seed
-     * @return a new {@link ByteRandomizer}.
-     */
-    public static ByteRandomizer aNewByteRandomizer(final long seed) {
-        return new ByteRandomizer(seed);
-    }
-
     @Override
     public Byte getRandomValue() {
         return delegate.getRandomValue().byteValue();

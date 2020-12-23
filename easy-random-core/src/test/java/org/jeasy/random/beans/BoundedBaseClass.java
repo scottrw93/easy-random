@@ -21,38 +21,26 @@
  *   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  *   THE SOFTWARE.
  */
-package org.jeasy.random.util;
+package org.jeasy.random.beans;
 
-import java.util.List;
-import java.util.Random;
+public abstract class BoundedBaseClass<T extends BoundedBaseClass.SomeInterface> {
+    private final T x;
 
-/**
- * Collection utility methods.
- * 
- * <strong>This class is intended for internal use only.</strong>
- *
- * @author Mahmoud Ben Hassine (mahmoud.benhassine@icloud.com)
- */
-public final class CollectionUtils {
-
-    private CollectionUtils() {
+    public BoundedBaseClass(T x) {
+        this.x = x;
     }
 
-    /**
-     * Get a random element from the list.
-     *
-     * @param list the input list
-     * @param <T>  the type of elements in the list
-     * @return a random element from the list or null if the list is empty
-     */
-    public static <T> T randomElementOf(final List<T> list) {
-        if (list.isEmpty()) {
-            return null;
+    public T getX() {
+        return x;
+    }
+
+    public interface SomeInterface { }
+
+    public static class IntWrapper implements SomeInterface {
+        private final int value;
+
+        public IntWrapper(int value) {
+            this.value = value;
         }
-        return list.get(nextInt(0, list.size()));
-    }
-
-    private static int nextInt(int startInclusive, int endExclusive) {
-        return startInclusive + new Random().nextInt(endExclusive - startInclusive);
     }
 }

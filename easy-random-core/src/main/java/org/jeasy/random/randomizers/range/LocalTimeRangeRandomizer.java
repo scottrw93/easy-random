@@ -24,7 +24,6 @@
 package org.jeasy.random.randomizers.range;
 
 import java.time.LocalTime;
-import java.time.temporal.ChronoField;
 
 /**
  * Generate a random {@link LocalTime} in the given range.
@@ -36,8 +35,8 @@ public class LocalTimeRangeRandomizer extends AbstractRangeRandomizer<LocalTime>
     /**
      * Create a new {@link LocalTimeRangeRandomizer}.
      *
-     * @param min min value
-     * @param max max value
+     * @param min min value (inclusive)
+     * @param max max value (exclusive)
      */
     public LocalTimeRangeRandomizer(final LocalTime min, final LocalTime max) {
         super(min, max);
@@ -46,35 +45,12 @@ public class LocalTimeRangeRandomizer extends AbstractRangeRandomizer<LocalTime>
     /**
      * Create a new {@link LocalTimeRangeRandomizer}.
      *
-     * @param min  min value
-     * @param max  max value
+     * @param min  min value (inclusive)
+     * @param max  max value (exclusive)
      * @param seed initial seed
      */
     public LocalTimeRangeRandomizer(final LocalTime min, final LocalTime max, final long seed) {
         super(min, max, seed);
-    }
-
-    /**
-     * Create a new {@link LocalTimeRangeRandomizer}.
-     *
-     * @param min min value
-     * @param max max value
-     * @return a new {@link LocalTimeRangeRandomizer}.
-     */
-    public static LocalTimeRangeRandomizer aNewLocalTimeRangeRandomizer(final LocalTime min, final LocalTime max) {
-        return new LocalTimeRangeRandomizer(min, max);
-    }
-
-    /**
-     * Create a new {@link LocalTimeRangeRandomizer}.
-     *
-     * @param min  min value
-     * @param max  max value
-     * @param seed initial seed
-     * @return a new {@link LocalTimeRangeRandomizer}.
-     */
-    public static LocalTimeRangeRandomizer aNewLocalTimeRangeRandomizer(final LocalTime min, final LocalTime max, final long seed) {
-        return new LocalTimeRangeRandomizer(min, max, seed);
     }
 
     @Override
@@ -96,10 +72,21 @@ public class LocalTimeRangeRandomizer extends AbstractRangeRandomizer<LocalTime>
 
     @Override
     public LocalTime getRandomValue() {
-        long minSecondOfDay = min.getLong(ChronoField.SECOND_OF_DAY);
-        long maxSecondOfDay = max.getLong(ChronoField.SECOND_OF_DAY);
-        long randomSecondOfDay = (long) nextDouble(minSecondOfDay, maxSecondOfDay);
-        return LocalTime.ofSecondOfDay(randomSecondOfDay);
+        int minNanoSecond = min.getNano();
+        int minSecond = min.getSecond();
+        int minMinute = min.getMinute();
+        int minHour = min.getHour();
+        
+        int maxNanoSecond = max.getNano();
+        int maxSecond = max.getSecond();
+        int maxMinute = max.getMinute();
+        int maxHour = max.getHour();
+
+        int randomNanoSecond = (int) nextDouble(minNanoSecond, maxNanoSecond);
+        int randomSecond = (int) nextDouble(minSecond, maxSecond);
+        int randomMinute = (int) nextDouble(minMinute, maxMinute);
+        int randomHour = (int) nextDouble(minHour, maxHour);
+        return LocalTime.of(randomHour, randomMinute, randomSecond, randomNanoSecond);
     }
 
 }

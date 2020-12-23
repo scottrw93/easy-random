@@ -57,25 +57,6 @@ public class LocalDateTimeRandomizer implements Randomizer<LocalDateTime> {
         localTimeRandomizer = new LocalTimeRandomizer(seed);
     }
 
-    /**
-     * Create a new {@link LocalDateTimeRandomizer}.
-     *
-     * @return a new {@link LocalDateTimeRandomizer}.
-     */
-    public static LocalDateTimeRandomizer aNewLocalDateTimeRandomizer() {
-        return new LocalDateTimeRandomizer();
-    }
-
-    /**
-     * Create a new {@link LocalDateTimeRandomizer}.
-     *
-     * @param seed initial seed
-     * @return a new {@link LocalDateTimeRandomizer}.
-     */
-    public static LocalDateTimeRandomizer aNewLocalDateTimeRandomizer(final long seed) {
-        return new LocalDateTimeRandomizer(seed);
-    }
-
     @Override
     public LocalDateTime getRandomValue() {
         LocalDate localDate = localDateRandomizer.getRandomValue();

@@ -33,15 +33,6 @@ import org.jeasy.random.api.Randomizer;
  */
 public class SkipRandomizer implements Randomizer<Object> {
 
-    /**
-     * Create a new {@link SkipRandomizer}.
-     *
-     * @return a new {@link SkipRandomizer}.
-     */
-    public static SkipRandomizer aNewSkipRandomizer() {
-        return new SkipRandomizer();
-    }
-
     @Override
     public Object getRandomValue() {
         return null;

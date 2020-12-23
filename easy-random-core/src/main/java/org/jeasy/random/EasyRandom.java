@@ -79,8 +79,11 @@ public class EasyRandom extends Random {
         arrayPopulator = new ArrayPopulator(this);
         CollectionPopulator collectionPopulator = new CollectionPopulator(this);
         MapPopulator mapPopulator = new MapPopulator(this, objectFactory);
+        OptionalPopulator optionalPopulator = new OptionalPopulator(this);
         enumRandomizersByType = new ConcurrentHashMap<>();
-        fieldPopulator = new FieldPopulator(this, this.randomizerProvider, arrayPopulator, collectionPopulator, mapPopulator);
+        fieldPopulator = new FieldPopulator(this,
+                this.randomizerProvider, arrayPopulator,
+                collectionPopulator, mapPopulator, optionalPopulator);
         exclusionPolicy = easyRandomParameters.getExclusionPolicy();
         parameters = easyRandomParameters;
     }
@@ -149,7 +152,7 @@ public class EasyRandom extends Random {
 
             // retrieve declared and inherited fields
             List<Field> fields = getDeclaredFields(result);
-            // we can not use type here, because with classpath scanning enabled the result can be a subtype
+            // we cannot use type here, because with classpath scanning enabled the result can be a subtype
             fields.addAll(getInheritedFields(result.getClass()));
 
             // inner classes (and static nested classes) have a field named "this$0" that references the enclosing class.

@@ -27,9 +27,10 @@ import org.jeasy.random.EasyRandomParameters;
 import org.jeasy.random.api.Randomizer;
 import org.jeasy.random.randomizers.range.DateRangeRandomizer;
 
+import java.time.ZonedDateTime;
 import java.util.Date;
 
-import static org.jeasy.random.util.DateUtils.toDate;
+import static java.util.Date.from;
 
 /**
  * Generate a random {@link Date}.
@@ -56,27 +57,12 @@ public class DateRandomizer implements Randomizer<Date> {
         delegate = new DateRangeRandomizer(toDate(EasyRandomParameters.DEFAULT_DATES_RANGE.getMin()), toDate(EasyRandomParameters.DEFAULT_DATES_RANGE.getMax()), seed);
     }
 
-    /**
-     * Create a new {@link DateRandomizer}.
-     *
-     * @return a new {@link DateRandomizer}.
-     */
-    public static DateRandomizer aNewDateRandomizer() {
-        return new DateRandomizer();
-    }
-
-    /**
-     * Create a new {@link DateRandomizer}.
-     *
-     * @param seed initial seed
-     * @return a new {@link DateRandomizer}.
-     */
-    public static DateRandomizer aNewDateRandomizer(final long seed) {
-        return new DateRandomizer(seed);
-    }
-
     @Override
     public Date getRandomValue() {
         return delegate.getRandomValue();
+    }
+
+    private Date toDate(ZonedDateTime zonedDateTime) {
+        return from(zonedDateTime.toInstant());
     }
 }

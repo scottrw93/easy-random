@@ -23,7 +23,6 @@
  */
 package org.jeasy.random.randomizers.range;
 
-import static org.jeasy.random.randomizers.range.DateRangeRandomizer.aNewDateRangeRandomizer;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -40,7 +39,7 @@ class DateRangeRandomizerTest extends AbstractRangeRandomizerTest<Date> {
     void setUp() {
         minDate = new Date(1460448795091L);
         maxDate = new Date(1460448795179L);
-        randomizer = aNewDateRangeRandomizer(minDate, maxDate);
+        randomizer = new DateRangeRandomizer(minDate, maxDate);
     }
 
     @Test
@@ -56,7 +55,7 @@ class DateRangeRandomizerTest extends AbstractRangeRandomizerTest<Date> {
     @Test
     void generatedDateShouldBeAlwaysTheSameForTheSameSeed() {
         // Given
-        randomizer = aNewDateRangeRandomizer(minDate, maxDate, SEED);
+        randomizer = new DateRangeRandomizer(minDate, maxDate, SEED);
         Date expected = new Date(1460448795154L);
 
         // When
@@ -68,31 +67,31 @@ class DateRangeRandomizerTest extends AbstractRangeRandomizerTest<Date> {
 
     @Test
     void whenSpecifiedMinDateIsAfterMaxDate_thenShouldThrowIllegalArgumentException() {
-        assertThatThrownBy(() -> aNewDateRangeRandomizer(maxDate, minDate)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new DateRangeRandomizer(maxDate, minDate)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     void whenSpecifiedMinDateIsNull_thenShouldUseDefaultMinValue() {
         // Given
-        randomizer = aNewDateRangeRandomizer(null, maxDate);
+        randomizer = new DateRangeRandomizer(null, maxDate);
 
         // When
         Date randomDate = randomizer.getRandomValue();
 
         // Then
-        assertThat(randomDate).isBeforeOrEqualsTo(maxDate);
+        assertThat(randomDate).isBeforeOrEqualTo(maxDate);
     }
 
     @Test
     void whenSpecifiedMaxDateIsNull_thenShouldUseDefaultMaxValue() {
         // Given
-        randomizer = aNewDateRangeRandomizer(minDate, null);
+        randomizer = new DateRangeRandomizer(minDate, null);
 
         // when
         Date randomDate = randomizer.getRandomValue();
 
         // Then
-        assertThat(randomDate).isAfterOrEqualsTo(minDate);
+        assertThat(randomDate).isAfterOrEqualTo(minDate);
     }
 
 }

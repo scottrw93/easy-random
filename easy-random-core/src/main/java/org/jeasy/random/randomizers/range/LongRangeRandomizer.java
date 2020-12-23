@@ -33,8 +33,8 @@ public class LongRangeRandomizer extends AbstractRangeRandomizer<Long> {
     /**
      * Create a new {@link LongRangeRandomizer}.
      *
-     * @param min min value
-     * @param max max value
+     * @param min min value (inclusive)
+     * @param max max value (exclusive)
      */
     public LongRangeRandomizer(final Long min, final Long max) {
         super(min, max);
@@ -43,35 +43,12 @@ public class LongRangeRandomizer extends AbstractRangeRandomizer<Long> {
     /**
      * Create a new {@link LongRangeRandomizer}.
      *
-     * @param min  min value
-     * @param max  max value
+     * @param min  min value (inclusive)
+     * @param max  max value (exclusive)
      * @param seed initial seed
      */
     public LongRangeRandomizer(final Long min, final Long max, final long seed) {
         super(min, max, seed);
-    }
-
-    /**
-     * Create a new {@link LongRangeRandomizer}.
-     *
-     * @param min min value
-     * @param max max value
-     * @return a new {@link LongRangeRandomizer}.
-     */
-    public static LongRangeRandomizer aNewLongRangeRandomizer(final Long min, final Long max) {
-        return new LongRangeRandomizer(min, max);
-    }
-
-    /**
-     * Create a new {@link LongRangeRandomizer}.
-     *
-     * @param min  min value
-     * @param max  max value
-     * @param seed initial seed
-     * @return a new {@link LongRangeRandomizer}.
-     */
-    public static LongRangeRandomizer aNewLongRangeRandomizer(final Long min, final Long max, final long seed) {
-        return new LongRangeRandomizer(min, max, seed);
     }
 
     @Override

@@ -60,25 +60,6 @@ public class ZoneOffsetRandomizer implements Randomizer<ZoneOffset> {
         integerRangeRandomizer = new IntegerRangeRandomizer(-MAX_SECONDS, MAX_SECONDS, seed);
     }
 
-    /**
-     * Create a new {@link ZoneOffsetRandomizer}.
-     *
-     * @return a new {@link ZoneOffsetRandomizer}.
-     */
-    public static ZoneOffsetRandomizer aNewZoneOffsetRandomizer() {
-        return new ZoneOffsetRandomizer();
-    }
-
-    /**
-     * Create a new {@link ZoneOffsetRandomizer}.
-     *
-     * @param seed initial seed
-     * @return a new {@link ZoneOffsetRandomizer}.
-     */
-    public static ZoneOffsetRandomizer aNewZoneOffsetRandomizer(final long seed) {
-        return new ZoneOffsetRandomizer(seed);
-    }
-
     @Override
     public ZoneOffset getRandomValue() {
         Integer randomValue = integerRangeRandomizer.getRandomValue();

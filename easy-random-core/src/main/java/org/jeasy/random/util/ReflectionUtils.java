@@ -28,15 +28,8 @@ import org.jeasy.random.ObjectCreationException;
 import org.jeasy.random.api.Randomizer;
 import org.objenesis.ObjenesisStd;
 
-import java.beans.IntrospectionException;
-import java.beans.PropertyDescriptor;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.function.Supplier;
@@ -46,6 +39,7 @@ import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Locale.ENGLISH;
 import static java.util.stream.Collectors.toList;
+import static org.jeasy.random.util.ConversionUtils.convertArguments;
 
 /**
  * Reflection utility methods.
@@ -134,14 +128,14 @@ public final class ReflectionUtils {
      */
     public static void setProperty(final Object object, final Field field, final Object value) throws IllegalAccessException, InvocationTargetException {
         try {
-            PropertyDescriptor propertyDescriptor = new PropertyDescriptor(field.getName(), object.getClass());
-            Method setter = propertyDescriptor.getWriteMethod();
-            if (setter != null) {
-                setter.invoke(object, value);
+            Optional<Method> setter = getWriteMethod(field);
+            if (setter.isPresent()) {
+                setter.get().invoke(object, value);
             } else {
                 setFieldValue(object, field, value);
             }
-        } catch (IntrospectionException | IllegalAccessException e) {
+        } catch (IllegalAccessException e) {
+            // otherwise, set field using reflection
             setFieldValue(object, field, value);
         }
     }
@@ -155,8 +149,7 @@ public final class ReflectionUtils {
      * @throws IllegalAccessException if the property cannot be set
      */
     public static void setFieldValue(final Object object, final Field field, final Object value) throws IllegalAccessException {
-        boolean access = field.isAccessible();
-        field.setAccessible(true);
+        boolean access = field.trySetAccessible();
         field.set(object, value);
         field.setAccessible(access);
     }
@@ -167,11 +160,10 @@ public final class ReflectionUtils {
      * @param object instance to get the field of
      * @param field  field to get the value of
      * @return the value of the field
-     * @throws IllegalAccessException if field can not be accessed
+     * @throws IllegalAccessException if field cannot be accessed
      */
     public static Object getFieldValue(final Object object, final Field field) throws IllegalAccessException {
-        boolean access = field.isAccessible();
-        field.setAccessible(true);
+        boolean access = field.trySetAccessible();
         Object value = field.get(object);
         field.setAccessible(access);
         return value;
@@ -353,6 +345,16 @@ public final class ReflectionUtils {
     }
 
     /**
+     * Check if a type is {@link Optional}.
+     *
+     * @param type the type to check
+     * @return true if the type is {@link Optional}, false otherwise.
+     */
+    public static boolean isOptionalType(final Class<?> type) {
+        return Optional.class.isAssignableFrom(type);
+    }
+
+    /**
      * Check if a type is a JDK built-in collection/map.
      *
      * @param type the type to check
@@ -488,8 +490,8 @@ public final class ReflectionUtils {
         rejectUnsupportedTypes(fieldType);
         Collection<?> collection;
         try {
-            collection = (Collection<?>) fieldType.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
+            collection = (Collection<?>) fieldType.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
             if (fieldType.equals(ArrayBlockingQueue.class)) {
                 collection = new ArrayBlockingQueue<>(initialSize);
             } else {
@@ -530,6 +532,16 @@ public final class ReflectionUtils {
     }
 
     /**
+     * Get the write method for given field.
+     *
+     * @param field field to get the write method for
+     * @return Optional of write method or empty if field has no write method
+     */
+    public static Optional<Method> getWriteMethod(Field field) {
+        return getPublicMethod("set" + capitalize(field.getName()), field.getDeclaringClass(), field.getType());
+    }
+
+    /**
      * Get the read method for given field.
      * @param field field to get the read method for.
      * @return Optional of read method or empty if field has no read method
@@ -537,7 +549,7 @@ public final class ReflectionUtils {
     public static Optional<Method> getReadMethod(Field field) {
         String fieldName = field.getName();
         Class<?> fieldClass = field.getDeclaringClass();
-        String capitalizedFieldName = fieldName.substring(0, 1).toUpperCase(ENGLISH) + fieldName.substring(1);
+        String capitalizedFieldName = capitalize(fieldName);
         // try to find getProperty
         Optional<Method> getter = getPublicMethod("get" + capitalizedFieldName, fieldClass);
         if (getter.isPresent()) {
@@ -547,9 +559,13 @@ public final class ReflectionUtils {
         return getPublicMethod("is" + capitalizedFieldName, fieldClass);
     }
 
-    private static Optional<Method> getPublicMethod(String name, Class<?> target) {
+    private static String capitalize(String propertyName) {
+        return propertyName.substring(0, 1).toUpperCase(ENGLISH) + propertyName.substring(1);
+    }
+
+    private static Optional<Method> getPublicMethod(String name, Class<?> target, Class<?>... parameterTypes) {
         try {
-            return Optional.of(target.getMethod(name));
+            return Optional.of(target.getMethod(name, parameterTypes));
         } catch (NoSuchMethodException | SecurityException e) {
             return Optional.empty();
         }
@@ -582,8 +598,8 @@ public final class ReflectionUtils {
                     return (Randomizer<T>) matchingConstructor.get().newInstance(convertArguments(randomizerArguments));
                 }
             }
-            return (Randomizer<T>) type.newInstance();
-        } catch (IllegalAccessException | InvocationTargetException | InstantiationException e) {
+            return (Randomizer<T>) type.getDeclaredConstructor().newInstance();
+        } catch (IllegalAccessException | InvocationTargetException | InstantiationException | NoSuchMethodException e) {
             throw new ObjectCreationException(format("Could not create Randomizer of type: %s with constructor arguments: %s", type, Arrays.toString(randomizerArguments)), e);
         }
     }
@@ -607,50 +623,7 @@ public final class ReflectionUtils {
         return true;
     }
 
-    private static Object[] convertArguments(final RandomizerArgument[] declaredArguments) {
-        int numberOfArguments = declaredArguments.length;
-        Object[] arguments = new Object[numberOfArguments];
-        for (int i = 0; i < numberOfArguments; i++) {
-            Class<?> type = declaredArguments[i].type();
-            String value = declaredArguments[i].value();
-            // issue 299: if argument type is array, split values before conversion
-            if (type.isArray()) {
-                Object[] values = Stream.of(value.split(",")).map(String::trim).toArray();
-                arguments[i] = convertArray(values, type);
-            } else {
-                arguments[i] = convertValue(value, type);
-            }
-        }
-        return arguments;
-    }
 
-    private static Object convertValue(String value, Class<?> targetType) {
-        if(Boolean.class.equals(targetType) || Boolean.TYPE.equals(targetType)) return Boolean.parseBoolean(value);
-        if(Byte.class.equals(targetType) || Byte.TYPE.equals(targetType)) return Byte.parseByte(value);
-        if(Short.class.equals(targetType) || Short.TYPE.equals(targetType)) return Short.parseShort(value);
-        if(Integer.class.equals(targetType) || Integer.TYPE.equals(targetType)) return Integer.parseInt(value);
-        if(Long.class.equals(targetType) || Long.TYPE.equals(targetType)) return Long.parseLong(value);
-        if(Float.class.equals(targetType) || Float.TYPE.equals(targetType)) return Float.parseFloat(value);
-        if(Double.class.equals(targetType) || Double.TYPE.equals(targetType)) return Double.parseDouble(value);
-        if(BigInteger.class.equals(targetType)) return new BigInteger(value);
-        if(BigDecimal.class.equals(targetType)) return new BigDecimal(value);
-        if(Date.class.equals(targetType)) return DateUtils.parse(value);
-        if(java.sql.Date.class.equals(targetType)) return java.sql.Date.valueOf(value);
-        if(java.sql.Time.class.equals(targetType)) return java.sql.Time.valueOf(value);
-        if(java.sql.Timestamp.class.equals(targetType)) return java.sql.Timestamp.valueOf(value);
-        if(LocalDate.class.equals(targetType)) return LocalDate.parse(value);
-        if(LocalTime.class.equals(targetType)) return LocalTime.parse(value);
-        if(LocalDateTime.class.equals(targetType)) return LocalDateTime.parse(value);
-        return value;
-    }
 
-    private static Object convertArray(Object array, Class<?> targetType) {
-        Object[] values = (Object[]) array;
-        Object convertedValuesArray = Array.newInstance(targetType.getComponentType(), values.length);
-        for (int i = 0; i < values.length; i++) {
-            Array.set(convertedValuesArray, i, convertValue((String) values[i], targetType.getComponentType()));
-        }
-        return convertedValuesArray;
-    }
 
 }

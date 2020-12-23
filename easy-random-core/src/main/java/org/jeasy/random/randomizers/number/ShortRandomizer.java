@@ -47,25 +47,6 @@ public class ShortRandomizer extends AbstractRandomizer<Short> {
         super(seed);
     }
 
-    /**
-     * Create a new {@link ShortRandomizer}.
-     *
-     * @return a new {@link ShortRandomizer}.
-     */
-    public static ShortRandomizer aNewShortRandomizer() {
-        return new ShortRandomizer();
-    }
-
-    /**
-     * Create a new {@link ShortRandomizer}.
-     *
-     * @param seed initial seed
-     * @return a new {@link ShortRandomizer}.
-     */
-    public static ShortRandomizer aNewShortRandomizer(final long seed) {
-        return new ShortRandomizer(seed);
-    }
-
     @Override
     public Short getRandomValue() {
         return (short) random.nextInt();

@@ -134,7 +134,7 @@ public class EasyRandomParameters {
         overrideDefaultInitialization = false;
         ignoreRandomizationErrors = false;
         bypassSetters = false;
-        reuseFieldValues = true;
+        reuseFieldValues = false;
         objectPoolSize = DEFAULT_OBJECT_POOL_SIZE;
         randomizationDepth = DEFAULT_RANDOMIZATION_DEPTH;
         dateRange = new Range<>(DEFAULT_DATES_RANGE.getMin().toLocalDate(), DEFAULT_DATES_RANGE.getMax().toLocalDate());

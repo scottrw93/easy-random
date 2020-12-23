@@ -484,10 +484,13 @@ class EasyRandomTest {
 
     @Test
     void generatedBeansShouldBeEqualForSameIndex() {
-        Person person1 = easyRandom.nextObject(Person.class);
+        EasyRandomParameters parameters = new EasyRandomParameters();
+        parameters.setReuseFieldValues(true);
+        EasyRandom easyRandomWithValueStore = new EasyRandom(parameters);
+        Person person1 = easyRandomWithValueStore.nextObject(Person.class);
         validatePerson(person1);
 
-        assertThat(easyRandom.nextOrGetObject(0, Person.class)).isEqualTo(person1);
+        assertThat(easyRandomWithValueStore.nextOrGetObject(0, Person.class)).isEqualTo(person1);
     }
 
     private void validatePerson(final Person person) {

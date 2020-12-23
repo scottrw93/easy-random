@@ -1,7 +1,7 @@
 enabled: true
 
 env:
-  SET_VERSION_OVERRIDE: 5.0.0-$GIT_BRANCH-SNAPSHOT
+  SET_VERSION_OVERRIDE: 5.0.1-$GIT_BRANCH-SNAPSHOT
 
 buildpack:
   host: git.hubteam.com
@@ -11,4 +11,4 @@ buildpack:
 
 provides:
   - name: easy-random
-    version: 5.0.0-$GIT_BRANCH-SNAPSHOT
+    version: 5.0.1-$GIT_BRANCH-SNAPSHOT

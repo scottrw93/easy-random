@@ -5,9 +5,9 @@ env:
 
 buildpack:
   host: git.hubteam.com
-  organization: HubSpot
+  organization: HubSpotProtected
   repository: Blazar-Buildpack-Java
-  branch: v2-single-module
+  branch: v2
 
 provides:
   - name: easy-random

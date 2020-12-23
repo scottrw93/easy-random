@@ -74,10 +74,14 @@ class EasyRandomTest {
     private Randomizer<String> randomizer;
 
     private EasyRandom easyRandom;
+    private EasyRandom easyRandomWithValueStore;
 
     @BeforeEach
     void setUp() {
         easyRandom = new EasyRandom();
+        EasyRandomParameters parameters = new EasyRandomParameters();
+        parameters.setReuseFieldValues(true);
+        easyRandomWithValueStore= new EasyRandom(parameters);
     }
 
     @Test
@@ -484,9 +488,6 @@ class EasyRandomTest {
 
     @Test
     void generatedBeansShouldBeEqualForSameIndex() {
-        EasyRandomParameters parameters = new EasyRandomParameters();
-        parameters.setReuseFieldValues(true);
-        EasyRandom easyRandomWithValueStore = new EasyRandom(parameters);
         Person person1 = easyRandomWithValueStore.nextObject(Person.class);
         validatePerson(person1);
 

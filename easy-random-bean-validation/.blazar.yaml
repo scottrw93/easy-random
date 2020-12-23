@@ -1,0 +1,18 @@
+enabled: true
+
+provides:
+  - name: easy-random-bean-validation
+    version: 5.0.1-$GIT_BRANCH-SNAPSHOT
+
+depends:
+  - easy-random-core
+  - easy-random-randomizers
+
+env:
+  SET_VERSION_OVERRIDE: 5.0.1-$GIT_BRANCH-SNAPSHOT
+
+buildpack:
+  host: git.hubteam.com
+  organization: HubSpotProtected
+  repository: Blazar-Buildpack-Java
+  branch: v2

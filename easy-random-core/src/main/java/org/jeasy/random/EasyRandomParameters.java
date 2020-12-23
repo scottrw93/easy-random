@@ -626,6 +626,7 @@ public class EasyRandomParameters {
         copy.setOverrideDefaultInitialization(this.isOverrideDefaultInitialization());
         copy.setIgnoreRandomizationErrors(this.isIgnoreRandomizationErrors());
         copy.setBypassSetters(this.isBypassSetters());
+        copy.setReuseFieldValues(this.isReuseFieldValues());
         copy.setCollectionSizeRange(this.getCollectionSizeRange());
         copy.setStringLengthRange(this.getStringLengthRange());
         copy.setDateRange(this.getDateRange());

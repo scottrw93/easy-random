@@ -23,8 +23,40 @@
  */
 package org.jeasy.random;
 
+import static java.sql.Timestamp.valueOf;
+import static java.time.LocalDateTime.of;
+import static java.util.Arrays.asList;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.BDDAssertions.then;
+import static org.jeasy.random.FieldPredicates.hasModifiers;
+import static org.jeasy.random.FieldPredicates.inClass;
+import static org.jeasy.random.FieldPredicates.named;
+import static org.jeasy.random.FieldPredicates.ofType;
+import static org.mockito.Mockito.*;
+
+import java.lang.reflect.Modifier;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Stream;
+
 import org.jeasy.random.api.Randomizer;
-import org.jeasy.random.beans.*;
+import org.jeasy.random.beans.AbstractBean;
+import org.jeasy.random.beans.Address;
+import org.jeasy.random.beans.BoundedBaseClass;
+import org.jeasy.random.beans.Gender;
+import org.jeasy.random.beans.GenericBaseClass;
+import org.jeasy.random.beans.Human;
+import org.jeasy.random.beans.ImmutableBean;
+import org.jeasy.random.beans.Node;
+import org.jeasy.random.beans.Person;
+import org.jeasy.random.beans.Salary;
+import org.jeasy.random.beans.Street;
+import org.jeasy.random.beans.TestBean;
+import org.jeasy.random.beans.TestData;
+import org.jeasy.random.beans.TestEnum;
 import org.jeasy.random.util.ReflectionUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -32,18 +64,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.lang.reflect.Modifier;
-import java.util.*;
-import java.util.stream.Stream;
-
-import static java.sql.Timestamp.valueOf;
-import static java.time.LocalDateTime.of;
-import static java.util.Arrays.asList;
-import static org.assertj.core.api.Assertions.*;
-import static org.assertj.core.api.BDDAssertions.then;
-import static org.jeasy.random.FieldPredicates.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EasyRandomTest {
@@ -54,10 +74,14 @@ class EasyRandomTest {
     private Randomizer<String> randomizer;
 
     private EasyRandom easyRandom;
+    private EasyRandom easyRandomWithValueStore;
 
     @BeforeEach
     void setUp() {
         easyRandom = new EasyRandom();
+        EasyRandomParameters parameters = new EasyRandomParameters();
+        parameters.setReuseFieldValues(true);
+        easyRandomWithValueStore= new EasyRandom(parameters);
     }
 
     @Test
@@ -460,6 +484,14 @@ class EasyRandomTest {
 
         // then
         assertThat(concrete.getX()).isInstanceOf(String.class);
+    }
+
+    @Test
+    void generatedBeansShouldBeEqualForSameIndex() {
+        Person person1 = easyRandomWithValueStore.nextObject(Person.class);
+        validatePerson(person1);
+
+        assertThat(easyRandomWithValueStore.nextOrGetObject(0, Person.class)).isEqualTo(person1);
     }
 
     private void validatePerson(final Person person) {

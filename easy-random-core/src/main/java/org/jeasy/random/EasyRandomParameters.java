@@ -23,19 +23,29 @@
  */
 package org.jeasy.random;
 
-import org.jeasy.random.api.*;
-import org.jeasy.random.randomizers.registry.CustomRandomizerRegistry;
-import org.jeasy.random.randomizers.registry.ExclusionRandomizerRegistry;
+import static java.lang.String.format;
+import static java.time.ZonedDateTime.of;
 
 import java.lang.reflect.Field;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.time.*;
-import java.util.*;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
-import static java.lang.String.format;
-import static java.time.ZonedDateTime.of;
+import org.jeasy.random.api.ExclusionPolicy;
+import org.jeasy.random.api.ObjectFactory;
+import org.jeasy.random.api.Randomizer;
+import org.jeasy.random.api.RandomizerProvider;
+import org.jeasy.random.api.RandomizerRegistry;
+import org.jeasy.random.randomizers.registry.CustomRandomizerRegistry;
+import org.jeasy.random.randomizers.registry.ExclusionRandomizerRegistry;
 
 /**
  * Parameters of an {@link EasyRandom} instance.
@@ -98,6 +108,7 @@ public class EasyRandomParameters {
     private boolean overrideDefaultInitialization;
     private boolean ignoreRandomizationErrors;
     private boolean bypassSetters;
+    private boolean reuseFieldValues;
     private Range<Integer> collectionSizeRange;
     private Range<Integer> stringLengthRange;
     private Range<LocalDate> dateRange;
@@ -123,6 +134,7 @@ public class EasyRandomParameters {
         overrideDefaultInitialization = false;
         ignoreRandomizationErrors = false;
         bypassSetters = false;
+        reuseFieldValues = false;
         objectPoolSize = DEFAULT_OBJECT_POOL_SIZE;
         randomizationDepth = DEFAULT_RANDOMIZATION_DEPTH;
         dateRange = new Range<>(DEFAULT_DATES_RANGE.getMin().toLocalDate(), DEFAULT_DATES_RANGE.getMax().toLocalDate());
@@ -228,6 +240,14 @@ public class EasyRandomParameters {
 
     public void setBypassSetters(boolean bypassSetters) {
         this.bypassSetters = bypassSetters;
+    }
+
+    public boolean isReuseFieldValues() {
+        return reuseFieldValues;
+    }
+
+    public void setReuseFieldValues(boolean reuseFieldValues) {
+        this.reuseFieldValues = reuseFieldValues;
     }
 
     public ExclusionPolicy getExclusionPolicy() {
@@ -606,6 +626,7 @@ public class EasyRandomParameters {
         copy.setOverrideDefaultInitialization(this.isOverrideDefaultInitialization());
         copy.setIgnoreRandomizationErrors(this.isIgnoreRandomizationErrors());
         copy.setBypassSetters(this.isBypassSetters());
+        copy.setReuseFieldValues(this.isReuseFieldValues());
         copy.setCollectionSizeRange(this.getCollectionSizeRange());
         copy.setStringLengthRange(this.getStringLengthRange());
         copy.setDateRange(this.getDateRange());

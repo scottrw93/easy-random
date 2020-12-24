@@ -23,12 +23,17 @@
  */
 package org.jeasy.random;
 
-import org.jeasy.random.api.RandomizerContext;
+import static java.util.stream.Collectors.toList;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Stack;
 
-import static java.util.stream.Collectors.toList;
+import org.jeasy.random.api.RandomizerContext;
 
 /**
  * Context object for a single call on {@link EasyRandom#nextObject(Class)}.
@@ -48,14 +53,25 @@ class RandomizationContext implements RandomizerContext {
 
     private final Random random;
 
+    private final int index;
+
     private Object rootObject;
 
     RandomizationContext(final Class<?> type, final EasyRandomParameters parameters) {
+        this(0, type, parameters);
+    }
+
+    RandomizationContext(final int index, final Class<?> type, final EasyRandomParameters parameters) {
         this.type = type;
         populatedBeans = new IdentityHashMap<>();
         stack = new Stack<>();
         this.parameters = parameters;
         this.random = new Random(parameters.getSeed());
+        this.index = index;
+    }
+
+    public int getIndex() {
+        return index;
     }
 
     void addPopulatedBean(final Class<?> type, Object object) {

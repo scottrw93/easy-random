@@ -23,16 +23,37 @@
  */
 package org.jeasy.random;
 
-import org.jeasy.random.api.*;
-import org.jeasy.random.randomizers.misc.EnumRandomizer;
-import org.jeasy.random.util.ReflectionUtils;
+import static org.jeasy.random.util.ReflectionUtils.getDeclaredFields;
+import static org.jeasy.random.util.ReflectionUtils.getFieldValue;
+import static org.jeasy.random.util.ReflectionUtils.getInheritedFields;
+import static org.jeasy.random.util.ReflectionUtils.isArrayType;
+import static org.jeasy.random.util.ReflectionUtils.isCollectionType;
+import static org.jeasy.random.util.ReflectionUtils.isEnumType;
+import static org.jeasy.random.util.ReflectionUtils.isIntrospectable;
+import static org.jeasy.random.util.ReflectionUtils.isMapType;
+import static org.jeasy.random.util.ReflectionUtils.isPrimitiveFieldWithDefaultValue;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Random;
+import java.util.ServiceLoader;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.jeasy.random.util.ReflectionUtils.*;
+import org.jeasy.random.api.ContextAwareRandomizer;
+import org.jeasy.random.api.ExclusionPolicy;
+import org.jeasy.random.api.ObjectFactory;
+import org.jeasy.random.api.Randomizer;
+import org.jeasy.random.api.RandomizerProvider;
+import org.jeasy.random.api.RandomizerRegistry;
+import org.jeasy.random.randomizers.misc.EnumRandomizer;
+import org.jeasy.random.util.ReflectionUtils;
 
 /**
  * Extension of {@link java.util.Random} that is able to generate random Java objects.
@@ -81,7 +102,7 @@ public class EasyRandom extends Random {
         MapPopulator mapPopulator = new MapPopulator(this, objectFactory);
         OptionalPopulator optionalPopulator = new OptionalPopulator(this);
         enumRandomizersByType = new ConcurrentHashMap<>();
-        fieldPopulator = new FieldPopulator(this,
+        fieldPopulator = setupFieldPopulator(easyRandomParameters, this,
                 this.randomizerProvider, arrayPopulator,
                 collectionPopulator, mapPopulator, optionalPopulator);
         exclusionPolicy = easyRandomParameters.getExclusionPolicy();
@@ -101,6 +122,19 @@ public class EasyRandom extends Random {
     }
 
     /**
+     * Generate or get a random instance of the given type.
+     *
+     * @param index          the index for which object to get or generate
+     * @param type           the type for which an instance will be generated
+     * @param <T>            the actual type of the target object
+     * @return a random instance of the given type
+     * @throws ObjectCreationException when unable to create a new instance of the given type
+     */
+    public <T> T nextOrGetObject(final int index, final Class<T> type) {
+        return doPopulateBean(type, new RandomizationContext(index, type, parameters));
+    }
+
+    /**
      * Generate a stream of random instances of the given type.
      *
      * @param type           the type for which instances will be generated
@@ -113,8 +147,8 @@ public class EasyRandom extends Random {
         if (streamSize < 0) {
             throw new IllegalArgumentException("The stream size must be positive");
         }
-
-        return Stream.generate(() -> nextObject(type)).limit(streamSize);
+        return IntStream.range(0, streamSize)
+            .mapToObj(index -> nextOrGetObject(index, type));
     }
 
     <T> T doPopulateBean(final Class<T> type, final RandomizationContext context) {
@@ -223,6 +257,31 @@ public class EasyRandom extends Random {
         List<RandomizerRegistry> registries = new ArrayList<>();
         ServiceLoader.load(RandomizerRegistry.class).forEach(registries::add);
         return registries;
+    }
+
+    private static FieldPopulator setupFieldPopulator(final EasyRandomParameters parameters,
+                                                      final EasyRandom easyRandom,
+                                                      final RandomizerProvider randomizerProvider,
+                                                      final ArrayPopulator arrayPopulator,
+                                                      final CollectionPopulator collectionPopulator,
+                                                      final MapPopulator mapPopulator,
+                                                      final OptionalPopulator optionalPopulator) {
+        if (parameters.isReuseFieldValues()) {
+            return new FieldPopulatorWithFieldValueStore(
+                easyRandom,
+                randomizerProvider,
+                arrayPopulator,
+                collectionPopulator,
+                mapPopulator,
+                optionalPopulator);
+        }
+        return new FieldPopulator(
+            easyRandom,
+            randomizerProvider,
+            arrayPopulator,
+            collectionPopulator,
+            mapPopulator,
+            optionalPopulator);
     }
 
 }

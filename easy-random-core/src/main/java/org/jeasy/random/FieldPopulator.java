@@ -23,7 +23,22 @@
  */
 package org.jeasy.random;
 
+import static org.jeasy.random.util.ReflectionUtils.filterSameParameterizedTypes;
+import static org.jeasy.random.util.ReflectionUtils.getPublicConcreteSubTypesOf;
+import static org.jeasy.random.util.ReflectionUtils.isAbstract;
+import static org.jeasy.random.util.ReflectionUtils.isArrayType;
+import static org.jeasy.random.util.ReflectionUtils.isCollectionType;
+import static org.jeasy.random.util.ReflectionUtils.isEnumType;
+import static org.jeasy.random.util.ReflectionUtils.isMapType;
+import static org.jeasy.random.util.ReflectionUtils.isOptionalType;
+import static org.jeasy.random.util.ReflectionUtils.isTypeVariable;
+import static org.jeasy.random.util.ReflectionUtils.setFieldValue;
+import static org.jeasy.random.util.ReflectionUtils.setProperty;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.util.List;
 
@@ -31,12 +46,6 @@ import org.jeasy.random.api.ContextAwareRandomizer;
 import org.jeasy.random.api.Randomizer;
 import org.jeasy.random.api.RandomizerProvider;
 import org.jeasy.random.randomizers.misc.SkipRandomizer;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Type;
-
-import static org.jeasy.random.util.ReflectionUtils.*;
 
 /**
  * Component that encapsulates the logic of generating a random value for a given field.
@@ -98,19 +107,23 @@ class FieldPopulator {
                     throw new ObjectCreationException(exceptionMessage, e);
                 }
             }
-            if (context.getParameters().isBypassSetters()) {
-                setFieldValue(target, field, value);
-            } else {
-                try {
-                    setProperty(target, field, value);
-                } catch (InvocationTargetException e) {
-                    String exceptionMessage = String.format("Unable to invoke setter for field %s of class %s",
-                            field.getName(), target.getClass().getName());
-                    throw new ObjectCreationException(exceptionMessage,  e.getCause());
-                }
-            }
+            populateField(target, field, value, context);
         }
         context.popStackItem();
+    }
+
+    void populateField(final Object target, final Field field, final Object value, final RandomizationContext context) throws IllegalAccessException {
+        if (context.getParameters().isBypassSetters()) {
+            setFieldValue(target, field, value);
+        } else {
+            try {
+                setProperty(target, field, value);
+            } catch (InvocationTargetException e) {
+                String exceptionMessage = String.format("Unable to invoke setter for field %s of class %s",
+                    field.getName(), target.getClass().getName());
+                throw new ObjectCreationException(exceptionMessage,  e.getCause());
+            }
+        }
     }
 
     private Randomizer<?> getRandomizer(Field field, RandomizationContext context) {

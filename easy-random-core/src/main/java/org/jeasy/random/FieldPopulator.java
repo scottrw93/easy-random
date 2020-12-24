@@ -107,12 +107,12 @@ class FieldPopulator {
                     throw new ObjectCreationException(exceptionMessage, e);
                 }
             }
-            setValue(target, field, value, context);
+            populateField(target, field, value, context);
         }
         context.popStackItem();
     }
 
-    void setValue(final Object target, final Field field, final Object value, final RandomizationContext context) throws IllegalAccessException {
+    void populateField(final Object target, final Field field, final Object value, final RandomizationContext context) throws IllegalAccessException {
         if (context.getParameters().isBypassSetters()) {
             setFieldValue(target, field, value);
         } else {

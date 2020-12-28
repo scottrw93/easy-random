@@ -7,6 +7,9 @@ provides:
 env:
   SET_VERSION_OVERRIDE: 5.0.1-$GIT_BRANCH-SNAPSHOT
 
+depends:
+  - easy-random-tests
+
 buildpack:
   host: git.hubteam.com
   organization: HubSpotProtected

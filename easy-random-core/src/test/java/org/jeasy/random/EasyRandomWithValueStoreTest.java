@@ -171,6 +171,8 @@ public class EasyRandomWithValueStoreTest {
         .isEqualToComparingFieldByFieldRecursively(
             actualImmutableWithUserDefinedClass.getUserDefinedClass().getBasicImmutable()
         );
+    assertThat(actualImmutableWithUserDefinedClass.getPrimitiveInt())
+        .isEqualTo(actualBasicImmutable.getPrimitiveInt());
     assertThat(actualImmutableWithUserDefinedClass.getOptionalUserDefinedClass())
         .isPresent();
     assertThat(actualImmutableWithUserDefinedClass.getPrimitiveInt()).isPositive();

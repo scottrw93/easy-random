@@ -35,7 +35,7 @@ public class FieldPopulatorWithFieldValueStore extends FieldPopulator {
   void populateField(final Object target, final Field field, final RandomizationContext context) throws IllegalAccessException {
     Optional<Object> maybeStoredFieldValue = fieldValueStore.get(context.getIndex(), field);
     if (maybeStoredFieldValue.isPresent()) {
-      populateField(target, field, maybeStoredFieldValue.get(), context);
+      super.populateField(target, field, maybeStoredFieldValue.get(), context);
       return;
     }
     super.populateField(target, field, context);

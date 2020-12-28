@@ -18,10 +18,12 @@ public class FieldValueStore {
   }
 
   public void put(int index, Field field, Object value) {
-    valuesByField.put(field, index,value);
+    if (value != null) {
+      valuesByField.put(field, index, value);
+    }
   }
 
-  public <T> Optional<T> get(int index, Field field) {
-    return (Optional<T>) Optional.ofNullable(valuesByField.get(field, index));
+  public Optional<Object> get(int index, Field field) {
+    return Optional.ofNullable(valuesByField.get(field, index));
   }
 }

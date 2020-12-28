@@ -40,6 +40,14 @@
             <groupId>io.github.classgraph</groupId>
             <artifactId>classgraph</artifactId>
         </dependency>
+        <!-- HubSpot Specific Dependencies -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
+        </dependency>
+
+        <!-- Test Dependencies -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

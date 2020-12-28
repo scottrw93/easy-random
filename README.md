@@ -170,6 +170,45 @@ public void testPersistPerson() throws Exception {
 
 There are many other uses cases where Easy Random can be useful, you can find a non exhaustive list in the [wiki](https://github.com/j-easy/easy-random/wiki/use-cases).
 
+## HubSpot specific usage
+
+We have added new parameter `reuseFieldValues` field for HubSpot specific usage. When this field is set to `true`, we will store field value with key: field name, field type and index. 
+
+### Usage
+
+```java
+EasyRandom easyRandom = new EasyRandom(EasyRandomParametersFactory.buildHubSpotSpecific());
+
+SomeClass instance = easyRandom.nextOrGetObject(1, SomeClass.class);
+```
+
+### Example
+
+If we have 2 classes having same field, will have the same value for same index
+
+```java
+class SomeClass {
+  int portalId;
+  long isDifferent;
+}
+
+class SomeOtherClass {
+  int portalId;
+  boolean isDifferent;
+}
+```
+We can create 2 instance of this class
+
+```java
+EasyRandom easyRandom = new EasyRandom(EasyRandomParametersFactory.buildHubSpotSpecific());
+
+SomeClass someClass = easyRandom.nextOrGetObject(1, SomeClass.class);
+SomeOtherClass someOtherClass = easyRandom.nextOrGetObject(1, SomeOtherClass.class);
+```
+
+In this case, `someClass.portalId` will be equal to `someOtherClass.portalId` while `isDifferent` will be different because its of different field type. 
+
+
 ## Extensions
 
 * [JUnit extension](https://glytching.github.io/junit-extensions/randomBeans): Use Easy Random to generate random data in JUnit tests (courtesy of [glytching](https://github.com/glytching))

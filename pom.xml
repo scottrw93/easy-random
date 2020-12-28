@@ -41,6 +41,7 @@
         <module>easy-random-core</module>
         <module>easy-random-bean-validation</module>
         <module>easy-random-randomizers</module>
+        <module>easy-random-tests</module>
     </modules>
 
     <scm>

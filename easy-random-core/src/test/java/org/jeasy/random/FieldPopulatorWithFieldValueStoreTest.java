@@ -53,7 +53,7 @@ public class FieldPopulatorWithFieldValueStoreTest {
     Field name = Human.class.getDeclaredField("name");
     Human human = new Human();
     RandomizationContext context = new RandomizationContext(1, Human.class, new EasyRandomParameters());
-    fieldValueStore.put(1, name.getName(), NAME);
+    fieldValueStore.put(1, name, NAME);
 
     // When
     fieldPopulator.populateField(human, name, context);
@@ -83,6 +83,6 @@ public class FieldPopulatorWithFieldValueStoreTest {
 
     // Then
     assertThat(human.getId()).isEqualTo(ID);
-    assertThat(fieldValueStore.get(1, id.getName())).hasValue(ID);
+    assertThat(fieldValueStore.get(1, id)).hasValue(ID);
   }
 }

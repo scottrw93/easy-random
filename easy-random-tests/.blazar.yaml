@@ -1,14 +1,11 @@
 enabled: true
 
 provides:
-  - name: easy-random-core
+  - name: easy-random-tests
     version: 5.0.1-$GIT_BRANCH-SNAPSHOT
 
 env:
   SET_VERSION_OVERRIDE: 5.0.1-$GIT_BRANCH-SNAPSHOT
-
-depends:
-  - easy-random-tests
 
 buildpack:
   host: git.hubteam.com

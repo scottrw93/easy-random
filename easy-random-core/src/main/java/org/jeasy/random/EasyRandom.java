@@ -63,6 +63,8 @@ import org.jeasy.random.util.ReflectionUtils;
 @SuppressWarnings({ "rawtypes", "unchecked" })
 public class EasyRandom extends Random {
 
+    private int currentIndex;
+
     private final EasyRandomParameters parameters;
 
     private final FieldPopulator fieldPopulator;
@@ -107,6 +109,7 @@ public class EasyRandom extends Random {
                 collectionPopulator, mapPopulator, optionalPopulator);
         exclusionPolicy = easyRandomParameters.getExclusionPolicy();
         parameters = easyRandomParameters;
+        currentIndex = 0;
     }
 
     /**
@@ -118,7 +121,9 @@ public class EasyRandom extends Random {
      * @throws ObjectCreationException when unable to create a new instance of the given type
      */
     public <T> T nextObject(final Class<T> type) {
-        return doPopulateBean(type, new RandomizationContext(type, parameters));
+        T t = nextOrGetObject(currentIndex, type);
+        currentIndex += 1;
+        return t;
     }
 
     /**

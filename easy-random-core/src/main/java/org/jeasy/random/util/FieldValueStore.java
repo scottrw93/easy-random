@@ -1,60 +1,65 @@
 package org.jeasy.random.util;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
-import com.google.common.collect.HashBasedTable;
-import com.google.common.collect.Table;
-
 public class FieldValueStore {
-  private final Table<FieldKey, Integer, Object> valuesByField;
+  private final Map<FieldValueKey, Object> valuesByFieldValueKey;
 
   public FieldValueStore() {
-    this(HashBasedTable.create());
+    this(new HashMap<>());
   }
 
-  public FieldValueStore(Table<FieldKey, Integer, Object> valuesByField) {
-    this.valuesByField = valuesByField;
+  public FieldValueStore(Map<FieldValueKey, Object> valuesByFieldValueKey) {
+    this.valuesByFieldValueKey = valuesByFieldValueKey;
   }
 
   public void put(int index, Field field, Object value) {
     if (value != null) {
-      valuesByField.put(new FieldKey(field), index, value);
+      valuesByFieldValueKey.put(new FieldValueKey(index, field), value);
     }
   }
 
   public Optional<Object> get(int index, Field field) {
-    return Optional.ofNullable(valuesByField.get(new FieldKey(field), index));
+    return Optional.ofNullable(valuesByFieldValueKey.get(new FieldValueKey(index, field)));
   }
 
-  public static class FieldKey {
+  public static class FieldValueKey {
+    private final int index;
     private final String name;
     private final Class<?> type;
 
-    FieldKey(String name, Class<?> type) {
+    FieldValueKey(int index, String name, Class<?> type) {
+      this.index = index;
       this.name = name;
       this.type = type;
     }
 
-    public FieldKey(Field field) {
-      this(field.getName(), field.getType());
+    public FieldValueKey(int index, Field field) {
+      this(index, field.getName(), field.getType());
     }
 
     @Override
     public int hashCode() {
-      return getName().hashCode() & getType().hashCode();
+      return getName().hashCode() ^ getType().hashCode() ^ getIndex();
     }
 
     @Override
     public boolean equals(Object obj) {
-      if (obj instanceof FieldKey) {
-        FieldKey other = (FieldKey)obj;
+      if (obj instanceof FieldValueKey) {
+        FieldValueKey other = (FieldValueKey) obj;
         return (getName().equals(other.getName()))
-            && (getType() == other.getType());
+            && (getType() == other.getType())
+            && (getIndex() == other.getIndex());
       }
       return false;
     }
 
+    public int getIndex() {
+      return index;
+    }
 
     public String getName() {
       return name;

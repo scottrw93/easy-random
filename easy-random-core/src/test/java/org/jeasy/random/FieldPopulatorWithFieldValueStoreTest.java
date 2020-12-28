@@ -85,4 +85,29 @@ public class FieldPopulatorWithFieldValueStoreTest {
     assertThat(human.getId()).isEqualTo(ID);
     assertThat(fieldValueStore.get(1, id)).hasValue(ID);
   }
+
+  @Test
+  void whenFieldValueNPresentInValueStoreForTheField_thenTheFieldShouldBePopulatedWithTheRandomValueForDifferentIndex() throws Exception {
+    // Given
+    Field id = Human.class.getDeclaredField("id");
+    Human human1 = new Human();
+    Human human10 = new Human();
+    RandomizationContext context1 = new RandomizationContext(1, Human.class, new EasyRandomParameters());
+    RandomizationContext context10 = new RandomizationContext(10, Human.class, new EasyRandomParameters());
+    when(randomizerProvider.getRandomizerByField(id, context1)).thenReturn(randomizer);
+    when(randomizerProvider.getRandomizerByField(id, context10)).thenReturn(randomizer);
+    when(randomizer.getRandomValue())
+        .thenReturn(ID)
+        .thenReturn(ID + 1);
+
+    // When
+    fieldPopulator.populateField(human1, id, context1);
+    fieldPopulator.populateField(human10, id, context10);
+
+    // Then
+    assertThat(human1.getId()).isEqualTo(ID);
+    assertThat(human10.getId()).isEqualTo(ID + 1);
+    assertThat(fieldValueStore.get(1, id)).hasValue(ID);
+    assertThat(fieldValueStore.get(10, id)).hasValue(ID + 1);
+  }
 }
